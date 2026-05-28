@@ -335,57 +335,63 @@
         ⚡ Сгенерировать
     </button>
 
-    <script>
-        const tg = window.Telegram.WebApp;
-        tg.expand();
-        tg.ready();
-        tg.enableClosingConfirmation();
+   <script>
+    const tg = window.Telegram.WebApp;
+    tg.expand();
+    tg.ready();
 
-        let selectedType = 'ideas';
+    let selectedType = 'ideas';
 
-        function selectType(type, element) {
-            selectedType = type;
-            document.querySelectorAll('.card').forEach(c => {
-                c.classList.remove('selected');
-            });
-            element.classList.add('selected');
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.selectionChanged();
-            }
+    function selectType(type, element) {
+        selectedType = type;
+        document.querySelectorAll('.card').forEach(c => {
+            c.classList.remove('selected');
+        });
+        element.classList.add('selected');
+        
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.selectionChanged();
         }
-
-        function setPrompt(text) {
-            document.getElementById('userInput').value = text;
-            
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred('light');
-            }
-        }
-
-        function sendToBot() {
-    const input = document.getElementById('userInput').value.trim();
-    
-    if (!input) {
-        tg.showAlert('Напиши тему для генерации!');
-        return;
     }
 
-    if (tg.HapticFeedback) {
-        tg.HapticFeedback.notificationOccurred('success');
+    function setPrompt(text) {
+        document.getElementById('userInput').value = text;
+        
+        if (tg.HapticFeedback) {
+            tg.HapticFeedback.impactOccurred('light');
+        }
     }
 
-    const data = JSON.stringify({
-        type: selectedType,
-        text: input
-    });
+    function sendToBot() {
+        const input = document.getElementById('userInput').value.trim();
+        
+        // Диагностика
+        if (!tg.initData) {
+            alert('❌ WebApp не инициализирован! Открой через бота.');
+            return;
+        }
 
-    // Отправляем данные боту
-    tg.sendData(data);
-    
-    // НЕ вызываем tg.close() — Telegram сам закроет WebApp после sendData
-}
-    </script>
+        if (!input) {
+            tg.showAlert('Напиши тему для генерации!');
+            return;
+        }
+
+        const data = JSON.stringify({
+            type: selectedType,
+            text: input
+        });
+
+        // Показываем что отправляем
+        alert('📤 Отправляю: ' + data);
+
+        try {
+            tg.sendData(data);
+            alert('✅ Отправлено! Закрываю...');
+        } catch (e) {
+            alert('❌ Ошибка: ' + e.message);
+        }
+    }
+</script>
 
 </body>
 </html>
