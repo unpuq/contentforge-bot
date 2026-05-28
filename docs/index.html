@@ -363,33 +363,20 @@
     }
 
     function sendToBot() {
-        const input = document.getElementById('userInput').value.trim();
-        
-        // Диагностика
-        if (!tg.initData) {
-            alert('❌ WebApp не инициализирован! Открой через бота.');
-            return;
-        }
+    const input = document.getElementById('userInput').value.trim();
+    
+    if (!input) {
+        tg.showAlert('Напиши тему для генерации!');
+        return;
+    }
 
-        if (!input) {
-            tg.showAlert('Напиши тему для генерации!');
-            return;
-        }
+    const data = JSON.stringify({
+        type: selectedType,
+        text: input
+    });
 
-        const data = JSON.stringify({
-            type: selectedType,
-            text: input
-        });
-
-        // Показываем что отправляем
-        alert('📤 Отправляю: ' + data);
-
-        try {
-            tg.sendData(data);
-            alert('✅ Отправлено! Закрываю...');
-        } catch (e) {
-            alert('❌ Ошибка: ' + e.message);
-        }
+    tg.sendData(data);
+}
     }
 </script>
 
