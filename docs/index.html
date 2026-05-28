@@ -336,49 +336,66 @@
     </button>
 
    <script>
+    // Инициализация Telegram WebApp
     const tg = window.Telegram.WebApp;
-    tg.expand();
-    tg.ready();
+    
+    if (tg) {
+        tg.expand();
+        tg.ready();
+    }
 
     let selectedType = 'ideas';
 
     function selectType(type, element) {
         selectedType = type;
-        document.querySelectorAll('.card').forEach(c => {
+        
+        // Убираем выделение со всех карточек
+        const cards = document.querySelectorAll('.card');
+        cards.forEach(function(c) {
             c.classList.remove('selected');
         });
+        
+        // Выделяем выбранную
         element.classList.add('selected');
         
-        if (tg.HapticFeedback) {
+        // Вибрация
+        if (tg && tg.HapticFeedback) {
             tg.HapticFeedback.selectionChanged();
         }
     }
 
     function setPrompt(text) {
-        document.getElementById('userInput').value = text;
+        const input = document.getElementById('userInput');
+        input.value = text;
         
-        if (tg.HapticFeedback) {
+        if (tg && tg.HapticFeedback) {
             tg.HapticFeedback.impactOccurred('light');
         }
     }
 
     function sendToBot() {
-    const input = document.getElementById('userInput').value.trim();
-    
-    if (!input) {
-        tg.showAlert('Напиши тему для генерации!');
-        return;
-    }
+        const input = document.getElementById('userInput').value.trim();
+        
+        if (!input) {
+            if (tg && tg.showAlert) {
+                tg.showAlert('Напиши тему для генерации!');
+            } else {
+                alert('Напиши тему для генерации!');
+            }
+            return;
+        }
 
-    const data = JSON.stringify({
-        type: selectedType,
-        text: input
-    });
+        const data = JSON.stringify({
+            type: selectedType,
+            text: input
+        });
 
-    tg.sendData(data);
-}
+        if (tg && tg.sendData) {
+            tg.sendData(data);
+        } else {
+            alert('Открой WebApp через бота в Telegram!');
+        }
     }
 </script>
-
 </body>
 </html>
