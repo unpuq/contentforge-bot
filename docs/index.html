@@ -1,1 +1,388 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ContentForge AI</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--tg-theme-bg-color, #17212b);
+            color: var(--tg-theme-text-color, #ffffff);
+            padding: 16px;
+            min-height: 100vh;
+            padding-bottom: 100px;
+        }
+
+        .header {
+            text-align: center;
+            padding: 24px 0 32px;
+        }
+
+        .logo {
+            font-size: 48px;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--tg-theme-hint-color, #8a99a8);
+            font-size: 14px;
+        }
+
+        .section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--tg-theme-hint-color, #8a99a8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 24px 0 12px 8px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .card {
+            background: var(--tg-theme-secondary-bg-color, #232e3c);
+            border-radius: 16px;
+            padding: 18px 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            opacity: 0;
+            transition: opacity 0.3s;
+            z-index: 0;
+        }
+
+        .card:active {
+            transform: scale(0.96);
+        }
+
+        .card.selected {
+            border-color: #667eea;
+        }
+
+        .card.selected::before {
+            opacity: 0.15;
+        }
+
+        .card-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-icon {
+            font-size: 32px;
+            margin-bottom: 10px;
+        }
+
+        .card h3 {
+            font-size: 15px;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--tg-theme-text-color, #ffffff);
+        }
+
+        .card p {
+            font-size: 12px;
+            color: var(--tg-theme-hint-color, #8a99a8);
+            line-height: 1.4;
+        }
+
+        .input-section {
+            margin-top: 24px;
+        }
+
+        .input-label {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: var(--tg-theme-text-color, #ffffff);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 16px;
+            border-radius: 14px;
+            border: 2px solid transparent;
+            background: var(--tg-theme-secondary-bg-color, #232e3c);
+            color: var(--tg-theme-text-color, #ffffff);
+            font-size: 15px;
+            font-family: inherit;
+            resize: none;
+            height: 110px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        textarea:focus {
+            border-color: #667eea;
+        }
+
+        textarea::placeholder {
+            color: var(--tg-theme-hint-color, #8a99a8);
+        }
+
+        .btn-main {
+            position: fixed;
+            bottom: 20px;
+            left: 16px;
+            right: 16px;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 17px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(102, 126, 234, 0.3);
+            transition: transform 0.2s;
+            z-index: 100;
+        }
+
+        .btn-main:active {
+            transform: scale(0.98);
+        }
+
+        .btn-main:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .quick-prompts {
+            display: flex;
+            gap: 8px;
+            overflow-x: auto;
+            padding: 8px 0 4px;
+            margin-bottom: 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .quick-prompts::-webkit-scrollbar {
+            display: none;
+        }
+
+        .quick-prompt {
+            flex-shrink: 0;
+            padding: 8px 14px;
+            background: var(--tg-theme-secondary-bg-color, #232e3c);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--tg-theme-text-color, #ffffff);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .quick-prompt:active {
+            transform: scale(0.95);
+            border-color: #667eea;
+        }
+
+        .stats-bar {
+            display: flex;
+            justify-content: space-around;
+            background: var(--tg-theme-secondary-bg-color, #232e3c);
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 8px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: var(--tg-theme-hint-color, #8a99a8);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <div class="logo">✨</div>
+        <h1>ContentForge AI</h1>
+        <p>Создавай контент за секунды</p>
+    </div>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <div class="stat-value">10x</div>
+            <div class="stat-label">Быстрее</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">24/7</div>
+            <div class="stat-label">Работа</div>
+        </div>
+        <div class="stat">
+            <div class="stat-value">∞</div>
+            <div class="stat-label">Идей</div>
+        </div>
+    </div>
+
+    <div class="section-title">Выбери формат</div>
+
+    <div class="cards-grid">
+        <div class="card selected" onclick="selectType('ideas', this)">
+            <div class="card-content">
+                <div class="card-icon">🎯</div>
+                <h3>Идеи</h3>
+                <p>10 свежих идей для контента</p>
+            </div>
+        </div>
+
+        <div class="card" onclick="selectType('post', this)">
+            <div class="card-content">
+                <div class="card-icon">📝</div>
+                <h3>Пост</h3>
+                <p>Готовый пост с хэштегами</p>
+            </div>
+        </div>
+
+        <div class="card" onclick="selectType('reels', this)">
+            <div class="card-content">
+                <div class="card-icon">🎬</div>
+                <h3>Reels</h3>
+                <p>Сценарий вирусного видео</p>
+            </div>
+        </div>
+
+        <div class="card" onclick="selectType('plan', this)">
+            <div class="card-content">
+                <div class="card-icon">📅</div>
+                <h3>Контент-план</h3>
+                <p>План на 7-30 дней</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="section-title">Быстрые темы</div>
+
+    <div class="quick-prompts">
+        <div class="quick-prompt" onclick="setPrompt('идеи для психолога про тревожность')">
+            🧠 Психология
+        </div>
+        <div class="quick-prompt" onclick="setPrompt('контент для фитнес-тренера')">
+            💪 Фитнес
+        </div>
+        <div class="quick-prompt" onclick="setPrompt('посты для онлайн-школы')">
+            📚 Обучение
+        </div>
+        <div class="quick-prompt" onclick="setPrompt('контент для бьюти-мастера')">
+            💄 Бьюти
+        </div>
+        <div class="quick-prompt" onclick="setPrompt('маркетинг для предпринимателей')">
+            📈 Бизнес
+        </div>
+    </div>
+
+    <div class="input-section">
+        <div class="input-label">Опиши тему</div>
+        <textarea 
+            id="userInput" 
+            placeholder="Например: посты про то, как избавиться от стресса на работе..."></textarea>
+    </div>
+
+    <button class="btn-main" onclick="sendToBot()">
+        ⚡ Сгенерировать
+    </button>
+
+    <script>
+        const tg = window.Telegram.WebApp;
+        tg.expand();
+        tg.ready();
+        tg.enableClosingConfirmation();
+
+        let selectedType = 'ideas';
+
+        function selectType(type, element) {
+            selectedType = type;
+            document.querySelectorAll('.card').forEach(c => {
+                c.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.selectionChanged();
+            }
+        }
+
+        function setPrompt(text) {
+            document.getElementById('userInput').value = text;
+            
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred('light');
+            }
+        }
+
+        function sendToBot() {
+            const input = document.getElementById('userInput').value.trim();
+            
+            if (!input) {
+                tg.showAlert('Напиши тему для генерации!');
+                return;
+            }
+
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.notificationOccurred('success');
+            }
+
+            tg.sendData(JSON.stringify({
+                type: selectedType,
+                text: input
+            }));
+            
+            tg.close();
+        }
+    </script>
+
+</body>
+</html>
