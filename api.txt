@@ -1,0 +1,6 @@
+devCrypt_bot:
+API: 8747374879:AAEdsbS4zAWMqLPf38Lu3uWdQDFKaO3bgSs
+CHATid: 1936209847
+proxyAPI:
+API: sk-mrKRkBnywJW1UC5fVwThcIp567hg4Pvx
+groq API: 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
