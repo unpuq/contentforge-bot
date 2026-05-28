@@ -2,8 +2,8 @@ from aiogram import Router, F
 from aiogram.filters import CommandStart
 from aiogram.types import (
     Message,
-    InlineKeyboardMarkup,
-    InlineKeyboardButton,
+    ReplyKeyboardMarkup,
+    KeyboardButton,
     WebAppInfo
 )
 from database import add_user, get_user
@@ -11,19 +11,32 @@ from keyboards import main_menu_keyboard
 
 router = Router()
 
-# Ссылка на твой WebApp
+# Ссылка на WebApp
 WEBAPP_URL = "https://unpuq.github.io/contentforge-bot/"
 
 
-def webapp_keyboard():
-    """Кнопка открытия WebApp"""
-    keyboard = InlineKeyboardMarkup(
-        inline_keyboard=[
-            [InlineKeyboardButton(
+def webapp_main_keyboard():
+    """Главное меню с кнопкой WebApp"""
+    keyboard = ReplyKeyboardMarkup(
+        keyboard=[
+            [KeyboardButton(
                 text="🚀 Открыть приложение",
                 web_app=WebAppInfo(url=WEBAPP_URL)
-            )]
-        ]
+            )],
+            [
+                KeyboardButton(text="🎯 Идеи контента"),
+                KeyboardButton(text="📝 Написать пост")
+            ],
+            [
+                KeyboardButton(text="🎬 Сценарий Reels"),
+                KeyboardButton(text="🔄 Адаптировать контент")
+            ],
+            [
+                KeyboardButton(text="📅 Контент-план"),
+                KeyboardButton(text="⚙️ Настройки")
+            ]
+        ],
+        resize_keyboard=True
     )
     return keyboard
 
@@ -44,24 +57,15 @@ async def cmd_start(message: Message):
             f"👋 Привет, {full_name}!\n\n"
             f"Я — **ContentForge AI** ✨\n\n"
             f"Твой персональный AI контент-мейкер.\n\n"
-            f"💎 **Открой приложение** — там удобный интерфейс:",
-            reply_markup=webapp_keyboard(),
+            f"💎 Нажми **🚀 Открыть приложение** для удобного интерфейса\n"
+            f"Или используй кнопки меню 👇",
+            reply_markup=webapp_main_keyboard(),
             parse_mode="Markdown"
-        )
-
-        await message.answer(
-            f"Или используй обычное меню 👇",
-            reply_markup=main_menu_keyboard()
         )
     else:
         await message.answer(
             f"👋 С возвращением, {full_name}!\n\n"
-            f"💎 Открой приложение для удобной работы:",
-            reply_markup=webapp_keyboard(),
-            parse_mode="Markdown"
-        )
-
-        await message.answer(
             f"Готов создавать контент 👇",
-            reply_markup=main_menu_keyboard()
+            reply_markup=webapp_main_keyboard(),
+            parse_mode="Markdown"
         )
