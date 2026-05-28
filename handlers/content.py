@@ -239,3 +239,58 @@ async def plan_generate(message: Message, state: FSMContext):
             await message.answer(part, reply_markup=main_menu_keyboard())
     else:
         await message.answer(result, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
+
+
+
+# === ОБРАБОТКА WEBAPP ===
+import json
+
+@router.message(F.web_app_data)
+async def handle_webapp_data(message: Message):
+    """Обработка данных из WebApp"""
+    
+    try:
+        data = json.loads(message.web_app_data.data)
+        content_type = data.get("type", "ideas")
+        user_text = data.get("text", "")
+        
+        if not user_text:
+            await message.answer("❌ Не указана тема")
+            return
+        
+        type_names = {
+            "ideas": "🎯 Генерирую идеи",
+            "post": "📝 Пишу пост",
+            "reels": "🎬 Создаю сценарий Reels",
+            "plan": "📅 Составляю контент-план"
+        }
+        
+        status_msg = await message.answer(
+            f"{type_names.get(content_type, '⏳ Генерирую')}... Подожди 15-30 секунд"
+        )
+        
+        if content_type == "plan":
+            user_message = f"Составь подробный контент-план на 7 дней на тему: {user_text}"
+        else:
+            user_message = user_text
+        
+        result = await generate_content(
+            user_id=message.from_user.id,
+            content_type=content_type,
+            user_message=user_message
+        )
+        
+        increment_requests(message.from_user.id)
+        save_history(message.from_user.id, content_type, user_text, result)
+        
+        await status_msg.delete()
+        
+        if len(result) > 4000:
+            parts = [result[i:i+4000] for i in range(0, len(result), 4000)]
+            for part in parts:
+                await message.answer(part, reply_markup=main_menu_keyboard())
+        else:
+            await message.answer(result, reply_markup=main_menu_keyboard(), parse_mode="Markdown")
+        
+    except Exception as e:
+        await message.answer(f"❌ Ошибка: {str(e)}")
