@@ -249,6 +249,8 @@ import json
 async def handle_webapp_data(message: Message):
     """Обработка данных из WebApp"""
     
+        await message.answer(f"📥 Данные получены!\n\n{message.web_app_data.data}")
+    
     try:
         data = json.loads(message.web_app_data.data)
         content_type = data.get("type", "ideas")
