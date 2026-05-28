@@ -364,24 +364,27 @@
         }
 
         function sendToBot() {
-            const input = document.getElementById('userInput').value.trim();
-            
-            if (!input) {
-                tg.showAlert('Напиши тему для генерации!');
-                return;
-            }
+    const input = document.getElementById('userInput').value.trim();
+    
+    if (!input) {
+        tg.showAlert('Напиши тему для генерации!');
+        return;
+    }
 
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.notificationOccurred('success');
-            }
+    if (tg.HapticFeedback) {
+        tg.HapticFeedback.notificationOccurred('success');
+    }
 
-            tg.sendData(JSON.stringify({
-                type: selectedType,
-                text: input
-            }));
-            
-            tg.close();
-        }
+    const data = JSON.stringify({
+        type: selectedType,
+        text: input
+    });
+
+    // Отправляем данные боту
+    tg.sendData(data);
+    
+    // НЕ вызываем tg.close() — Telegram сам закроет WebApp после sendData
+}
     </script>
 
 </body>
